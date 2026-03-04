@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+{% macro render_trend_card(trend) -%}
+<a class="card trend-card" href="/trends/{{ trend.id }}">
+  <div class="preview">
+    {% set preview_url = trend.preview_url or "" %}
+    {% set lower_url = preview_url | lower %}
+    {% if trend.type.value == "video" and (".mp4" in lower_url or ".webm" in lower_url or ".mov" in lower_url or ".m3u8" in lower_url) %}
+    <video src="{{ trend.preview_url }}" muted autoplay loop playsinline></video>
+    {% elif preview_url %}
+    <img src="{{ trend.preview_url }}" alt="{{ trend.title }}" loading="lazy" />
+    {% else %}
+    <div class="preview-placeholder">Нет превью</div>
+    {% endif %}
+    <div class="preview-shade"></div>
+    <div class="card-top-line">
+      <span class="badge">{% if trend.type.value == "video" %}видео{% else %}фото{% endif %}</span>
+      <span class="card-markers">
+        {% if trend.is_popular %}<span class="chip hot">✦ Популярное</span>{% endif %}
+        {% if "new" in trend.tags %}<span class="chip new">Новинка</span>{% endif %}
+      </span>
+    </div>
+    <div class="card-bottom-line">
+      <h3>{{ trend.title }}</h3>
+      <span class="price-pill">{{ trend.price_tokens }} токенов</span>
+    </div>
+    {% if trend.is_active %}
+    <span class="chip ok status-chip">активен</span>
+    {% else %}
+    <span class="chip status-chip">неактивен</span>
+    {% endif %}
+  </div>
+</a>
+{%- endmacro %}
+<section class="page-head catalog-hero">
+  <div class="hero-copy">
+    <p class="eyebrow">✦ Тренды</p>
+    <h1>Каталог трендов</h1>
+    <p class="muted">Создавайте эффектные фото и видео с помощью нейросетей.</p>
+  </div>
+  <div class="balance"><span class="balance-icon">◉</span> Баланс: <strong>{{ user.token_balance }}</strong> токенов</div>
+</section>
+
+<form method="get" class="catalog-search">
+  {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}" />{% endif %}
+  {% if selected_collection %}<input type="hidden" name="collection" value="{{ selected_collection }}" />{% endif %}
+  {% if selected_type %}<input type="hidden" name="type" value="{{ selected_type }}" />{% endif %}
+  {% if selected_sort and selected_sort != "popular" %}<input type="hidden" name="sort" value="{{ selected_sort }}" />{% endif %}
+  <label class="search-input-wrap">
+    <span class="visually-hidden">Поиск трендов</span>
+    <span class="search-icon">⌕</span>
+    <input type="search" name="search" value="{{ search_query }}" placeholder="Поиск трендов..." />
+  </label>
+  <button class="btn" type="submit">Найти</button>
+  <a class="btn secondary" href="{{ build_trends_url(search=None) }}">Сбросить поиск</a>
+</form>
+
+<section class="catalog-toolbar">
+  <details class="filters-dropdown"{% if filters_open %} open{% endif %}>
+    <summary class="filter-toggle">Фильтры <span>{{ total }}</span></summary>
+    <div class="catalog-filters">
+      <div class="filters-block">
+        <p class="filters-title">Категория</p>
+        <div class="chips-row">
+          <a class="filter-chip{% if not selected_category %} is-active{% endif %}" href="{{ build_trends_url(category=None) }}">Все</a>
+          {% for category_code in catalog_categories %}
+          <a
+            class="filter-chip{% if selected_category == category_code %} is-active{% endif %}"
+            href="{{ build_trends_url(category=category_code) }}"
+          >
+            {{ category_labels.get(category_code, category_code) }}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="filters-block">
+        <p class="filters-title">Тип контента</p>
+        <div class="chips-row">
+          <a class="filter-chip{% if not selected_type %} is-active{% endif %}" href="{{ build_trends_url(trend_type=None) }}">Все</a>
+          <a class="filter-chip{% if selected_type == 'video' %} is-active{% endif %}" href="{{ build_trends_url(trend_type='video') }}">Видео</a>
+          <a class="filter-chip{% if selected_type == 'photo' %} is-active{% endif %}" href="{{ build_trends_url(trend_type='photo') }}">Фото</a>
+        </div>
+      </div>
+
+      <div class="filters-block">
+        <p class="filters-title">Сортировка</p>
+        <div class="chips-row">
+          <a class="filter-chip{% if selected_sort == 'popular' %} is-active{% endif %}" href="{{ build_trends_url(sort='popular') }}">Популярные</a>
+          <a class="filter-chip{% if selected_sort == 'newest' %} is-active{% endif %}" href="{{ build_trends_url(sort='newest') }}">Новые</a>
+          <a class="filter-chip{% if selected_sort == 'cheapest' %} is-active{% endif %}" href="{{ build_trends_url(sort='cheapest') }}">Дешевле</a>
+        </div>
+      </div>
+
+      <div class="filters-block">
+        <p class="filters-title">Подборка</p>
+        <div class="chips-row">
+          <a class="filter-chip{% if not selected_collection %} is-active{% endif %}" href="{{ build_trends_url(collection=None) }}">Все</a>
+          <a class="filter-chip{% if selected_collection == 'popular' %} is-active{% endif %}" href="{{ build_trends_url(collection='popular') }}">Популярное</a>
+          <a class="filter-chip{% if selected_collection == 'new' %} is-active{% endif %}" href="{{ build_trends_url(collection='new') }}">Новинки</a>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <a class="btn secondary tiny" href="{{ build_trends_url(category=None, trend_type=None, sort='popular', collection=None) }}">Сбросить фильтры</a>
+        <a class="btn secondary tiny" href="/trends">Сбросить всё</a>
+      </div>
+    </div>
+  </details>
+</section>
+
+{% if trending_week %}
+<section class="trending-week">
+  <p class="trending-week-title">🔥 Trending this week</p>
+  <div class="trending-week-list">
+    {% for trend in trending_week %}
+    <a class="trending-week-chip" href="/trends/{{ trend.id }}">{{ trend.title }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if catalog_sections %}
+<section class="catalog-sections">
+  {% for section in catalog_sections %}
+  <section class="catalog-section" id="section-{{ section.slug }}">
+    <div class="catalog-section-head">
+      <h2>{{ section.title }}</h2>
+      <p class="muted">{{ section["items"] | length }} шаблона</p>
+    </div>
+    <div class="cards-rail">
+      {% for trend in section["items"] %}
+      {{ render_trend_card(trend) }}
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</section>
+{% else %}
+<p class="muted empty-note">По текущим фильтрам тренды не найдены.</p>
+{% endif %}
+{% endblock %}

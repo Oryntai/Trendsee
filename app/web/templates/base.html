@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "Trendsee" }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/app.css" />
+    <script defer src="/static/js/app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="logo" href="/trends">Trendsee</a>
+        <nav class="nav">
+          <a href="/trends">Каталог</a>
+          <a href="/generations">История</a>
+          <a href="/admin/trends">Админ</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

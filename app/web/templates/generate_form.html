@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="form-wrap generation-screen">
+  <div class="generation-head">
+    <div>
+      <p class="eyebrow">Создание контента</p>
+      <h1>Генерация: {{ trend.title }}</h1>
+      <p class="muted">
+        Тип: {% if trend.type.value == "video" %}видео{% else %}фото{% endif %} |
+        Цена: {{ trend.price_tokens }} токенов
+      </p>
+    </div>
+    <div class="balance">Баланс: <strong>{{ user.token_balance }}</strong> токенов</div>
+  </div>
+
+  {% if trend.preview_url %}
+  <div class="generation-preview">
+    {% set lower_url = trend.preview_url | lower %}
+    {% if trend.type.value == "video" and (".mp4" in lower_url or ".webm" in lower_url or ".mov" in lower_url or ".m3u8" in lower_url) %}
+    <video src="{{ trend.preview_url }}" controls playsinline></video>
+    {% else %}
+    <img src="{{ trend.preview_url }}" alt="{{ trend.title }}" />
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="stacked-form">
+    <section class="form-section prompt-section">
+      <h2>1. Основная идея</h2>
+      <p class="muted">Опишите, как должен выглядеть итоговый контент.</p>
+      <label>
+        Промпт (главное поле)
+        <textarea
+          class="textarea-card textarea-card--primary"
+          name="prompt"
+          rows="7"
+          required
+          placeholder="Опишите желаемый результат"
+        ></textarea>
+      </label>
+      <p class="hint">
+        Подсказка: опишите сцену, объект, свет, ракурс и настроение.<br />
+        Пример: "Премиальный флакон уходового средства на мраморной поверхности, мягкий студийный свет."
+      </p>
+    </section>
+
+    <section class="form-section">
+      <h2>2. Референсы и материалы</h2>
+      <label>
+        Ресурсы (каждая строка: URL | заметка)
+        <textarea
+          class="textarea-card"
+          name="resources"
+          rows="5"
+          placeholder="https://example.com | референс 1"
+        ></textarea>
+      </label>
+
+      <div class="upload-group">
+        <p class="upload-title">Загрузить изображения/видео</p>
+        <label class="dropzone" data-dropzone for="files-input">
+          <input
+            id="files-input"
+            class="dropzone-input"
+            type="file"
+            name="files"
+            multiple
+            accept=".jpg,.jpeg,.png,.mp4"
+          />
+          <span class="dropzone-icon">⬆</span>
+          <span class="dropzone-main">Перетащите файлы сюда</span>
+          <span class="dropzone-sub">или нажмите чтобы выбрать</span>
+          <span class="dropzone-meta">JPG, PNG, MP4 • до 10MB</span>
+          <span class="dropzone-status" data-dropzone-status>Файлы не выбраны</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section launch-section">
+      <h2>3. Запуск</h2>
+      <p class="muted">После запуска токены спишутся сразу, статус будет обновляться автоматически.</p>
+      <button class="btn launch-btn" type="submit">✦ Сгенерировать · {{ trend.price_tokens }} токенов</button>
+    </section>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+  <h1>История генераций</h1>
+  <p class="muted">Последние 20 генераций демо-пользователя.</p>
+
+  <div class="history-list">
+    {% for row in rows %}
+    <a class="history-item" href="/generations/{{ row.id }}">
+      <div>
+        <strong>{{ row.trend.title }}</strong>
+        <p class="muted">{{ row.created_at_display }}</p>
+      </div>
+      <div class="status {{ row.status_value }}">{{ row.status_label }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+

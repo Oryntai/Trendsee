@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<section
+  class="status-wrap generation-result-screen"
+  id="generation-status"
+  data-events-url="{{ events_url }}"
+  data-trend-title="{{ generation.trend.title }}"
+  data-generation-id="{{ generation.id }}"
+  data-provider="{{ generation.provider }}"
+  data-model="{{ generation.model }}"
+>
+  <div class="result-head">
+    <h1>Результат генерации</h1>
+    <p class="muted result-subtitle">Генерация для тренда: {{ generation.trend.title }}</p>
+    <p class="muted result-id">Идентификатор: {{ generation.id }}</p>
+    <p>Статус: <strong id="status-value" data-status="{{ generation.status.value }}">{{ status_label }}</strong></p>
+    <p class="muted">Цена: {{ generation.price_tokens }} токенов</p>
+  </div>
+
+  <div class="result-layout">
+    <section class="result-preview-card">
+      <h2>Превью результата</h2>
+      <div class="result-preview-frame">
+        {% set preview_url = generation.trend.preview_url or "" %}
+        {% set lower_url = preview_url | lower %}
+        {% if preview_url and generation.trend.type.value == "video" and (".mp4" in lower_url or ".webm" in lower_url or ".mov" in lower_url or ".m3u8" in lower_url) %}
+        <video src="{{ generation.trend.preview_url }}" muted autoplay loop playsinline controls></video>
+        {% elif preview_url %}
+        <img src="{{ generation.trend.preview_url }}" alt="{{ generation.trend.title }}" loading="lazy" />
+        {% else %}
+        <div class="preview-fallback">Демо-превью результата</div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="result-content-card">
+      <h2>Сгенерированный результат</h2>
+      <div id="result-content" class="result-rich" aria-live="polite"></div>
+
+      <details class="technical-details" id="technical-details">
+        <summary>Технические детали</summary>
+        <div id="technical-content" class="technical-content"></div>
+      </details>
+
+      <pre id="result-raw" class="result-raw hidden">{{ generation.result_text or "" }}</pre>
+    </section>
+  </div>
+
+  <p id="error-text" class="error{% if not generation.error_message %} hidden{% endif %}">{{ generation.error_message or "" }}</p>
+
+  <div class="result-actions">
+    <a class="btn" href="/trends/{{ generation.trend_id }}/generate">Сгенерировать снова</a>
+    <a class="btn secondary" href="/trends">Назад в каталог</a>
+    <button class="btn secondary" type="button" id="copy-result-btn">Скопировать результат</button>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="trend-detail">
+  <div class="preview big">
+    {% set preview_url = trend.preview_url or "" %}
+    {% set lower_url = preview_url | lower %}
+    {% if trend.type.value == "video" and (".mp4" in lower_url or ".webm" in lower_url or ".mov" in lower_url or ".m3u8" in lower_url) %}
+    <video src="{{ trend.preview_url }}" controls playsinline></video>
+    {% elif preview_url %}
+    <img src="{{ trend.preview_url }}" alt="{{ trend.title }}" />
+    {% else %}
+    <div class="preview-placeholder">Нет превью</div>
+    {% endif %}
+  </div>
+  <div class="detail-body">
+    <h1>{{ trend.title }}</h1>
+    <p class="muted">Тип: <strong>{% if trend.type.value == "video" %}видео{% else %}фото{% endif %}</strong></p>
+    <p>Цена: <strong>{{ trend.price_tokens }} токенов</strong></p>
+    <div class="row flags">
+      {% if trend.is_popular %}<span class="chip hot">популярный</span>{% endif %}
+      {% if trend.is_active %}<span class="chip ok">активен</span>{% else %}<span class="chip">неактивен</span>{% endif %}
+    </div>
+    {% if trend.tags %}
+    <p class="tags">Теги: {{ tags_display }}</p>
+    {% endif %}
+    {% if trend.prompt_template %}
+    <p class="template"><strong>Шаблон:</strong> {{ trend.prompt_template }}</p>
+    {% endif %}
+    <a class="btn" href="/trends/{{ trend.id }}/generate">Перейти к генерации</a>
+  </div>
+</article>
+{% endblock %}
+
